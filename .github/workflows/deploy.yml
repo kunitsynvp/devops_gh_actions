@@ -28,7 +28,11 @@ jobs:
 
       - name: Docker push
         run: docker push ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}}
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
 
+    steps:
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
