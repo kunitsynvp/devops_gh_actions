@@ -3,23 +3,18 @@ name: CI Pipeline
 on:
   push:
     branches: [master]  # Запускать только при пуше в ветку main
+  workflow_call:
+
 
 jobs:
+  checks:
+    uses: ./.github/workflows/pr-check.yml
+
   build:
+    needs: checks
     runs-on: ubuntu-latest  # Используем GitHub-hosted runner с Ubuntu
 
     steps:
-      - uses: actions/checkout@v3  # Клонирует код из репозитория
-
-      - name: Установка зависимостей
-        run: npm ci
-
-      - name: Линтинг
-        run: npm run lint
-
-      - name: Тестирование
-        run: npm run test
-
       - name: Сборка
         run: docker build -t ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} .
 
@@ -28,6 +23,7 @@ jobs:
 
       - name: Docker push
         run: docker push ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}}
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
